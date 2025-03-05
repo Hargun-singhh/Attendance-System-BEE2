@@ -8,4 +8,4 @@ router.get('/',studentController.allstudents);
 router.post('/',studentController.addstudent);
 
 
-module.exports = router;studentController
+module.exports = router;
