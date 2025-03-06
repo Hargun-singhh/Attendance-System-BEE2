@@ -1,6 +1,6 @@
 const professors = require('../data/professor');
 
-// Get all professors
+
 exports.allProfessors = (req, res) => {
     if (professors.length === 0) {
         return res.status(404).json({ message: "No professors found" });
@@ -8,12 +8,11 @@ exports.allProfessors = (req, res) => {
     res.status(200).json(professors);
 };
 
-// Add a new professor
 exports.addProfessor = (req, res) => {
     const { PName, Id_ } = req.body;
 
     const professorDetails = {
-        id: professors.length + 1, // Assuming auto-increment logic
+        id: professors.length + 1,
         professorName: PName,
         ID: parseInt(Id_)
     };
@@ -22,7 +21,7 @@ exports.addProfessor = (req, res) => {
     res.status(201).json({ message: "Professor record added successfully :)", professor: professorDetails });
 };
 
-// Update professor name by ID
+
 exports.updateProfessorName = (req, res) => {
     const { id } = req.params;
     const { PName } = req.body;
@@ -37,7 +36,7 @@ exports.updateProfessorName = (req, res) => {
     res.status(200).json({ message: "Professor name updated successfully", professor });
 };
 
-// Delete professor by ID
+
 exports.deleteProfessorById = (req, res) => {
     const { id } = req.params;
     const index = professors.findIndex(p => p.ID === parseInt(id));

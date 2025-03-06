@@ -1,6 +1,5 @@
 const students = require('../data/students');
 
-//Show all students
 exports.allstudents = (req, res) => {
     if (students.length === 0) {
         return res.status(404).json({ message: "No students found" });
@@ -8,7 +7,7 @@ exports.allstudents = (req, res) => {
     res.status(200).json(students);
 };
 
-//Add a new student
+
 exports.addstudent = (req, res) => {
     const {SName, RollNumber } = req.body;
 
@@ -23,24 +22,23 @@ exports.addstudent = (req, res) => {
     res.status(201).json({ message: "Student Record Added Successfully :) " });
 };
 
-// Update Student Name
 exports.updateStudentName = (req, res) => {
-    const { roll_no } = req.params; 
-    const { name } = req.body; 
-    const student = students.find(s => s.roll_no === parseInt(roll_no));
+    const { RollNumber } = req.params; 
+    const { SName } = req.body; 
+    const student = students.find(s => s.RollNumber === parseInt(RollNumber));
 
     if (!student) {
         return res.status(404).json({ message: "Student not found" });
     }
 
-    student.name = name;
+    student.StudentName = SName;
     res.status(200).json({ message: "Student name updated successfully", student });
 };
 
 // Delete Student record by its roll No
 exports.deleteStudentByRollNo = (req, res) => {
-    const { roll_no } = req.params;
-    const index = students.findIndex(student => student.roll_no === parseInt(roll_no));
+    const { RollNumber } = req.params;
+    const index = students.findIndex(student => student.RollNumber === parseInt(RollNumber));
 
     if (index === -1) {
         return res.status(404).json({ message: "No such student exists" });
