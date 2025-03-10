@@ -15,5 +15,6 @@ app.use(logger);
 app.use('/api/students', studentRoutes);
 app.use('/api/course', CourseRoutes);
 app.use('/api/attendance',AttendanceRoutes);
+app.use('/api/professor',professorRoutes);
 
 module.exports = app; 
