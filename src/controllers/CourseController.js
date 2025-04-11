@@ -1,45 +1,70 @@
+const Course = require('../Model/Course');
 
-const courses = require('../data/Course');
-
-exports.allCourses = (req,res) =>{
-    res.status(200).json(courses);
-};
-
-exports.addCourseByName = (req,res) =>{
-    const { CourseName }  = req.body;
-
-    const CourseDetails = {
-        id: courses.length + 1,
-        CourseName: CourseName,
-
-    };
-
-    courses.push(CourseDetails);
-    res.status(201).json({message : "Course Added SuccesFully "})
-
-};
-
-exports.updateCourseName = (req, res) => {
-    const { id } = req.params; 
-    const { CourseName } = req.body; 
-    const course = courses.find(c => c.id === parseInt(id));
-
-    if (!course) {
-        return res.status(404).json({ message: "Course not found" });
+exports.allCourses = async (req, res) => {
+    try {
+        const courses = await Course.find();
+        res.status(200).json(courses);
+    } catch (error) {
+        res.status(500).json({ message: "Failed to fetch courses", error: error.message });
     }
-    course.CourseName = CourseName;
-    res.status(200).json({ message: "Course updated successfully", course });
 };
 
+exports.addCourseByName = async (req, res) => {
+    const { CourseName } = req.body;
 
-exports.deleteCoursebyID = (req,res) =>{
+    if (!CourseName) {
+        return res.status(400).json({ message: "CourseName is required" });
+    }
+
+    try {
+        const lastCourse = await Course.findOne().sort({ id: -1 });
+        const newId = Number(lastCourse?.id) + 1 || 101;
+
+        const course = new Course({ id: newId, CourseName });
+        await course.save();
+        res.status(201).json({ message: "Course added successfully", course });
+    } catch (error) {
+        res.status(500).json({ message: "Failed to add course", error: error.message });
+    }
+};
+
+exports.updateCourseName = async (req, res) => {
     const { id } = req.params;
-    const index = courses.findIndex(c => c.id === parseInt(id));
+    const { CourseName } = req.body;
 
-    if (index === -1) {
-        return res.status(404).json({ message: "No Such Course Exists" });
+    if (!CourseName) {
+        return res.status(400).json({ message: "CourseName is required" });
     }
-    courses.splice(index, 1);
-    res.status(200).json({Message : "Course Deleted Successfully "})
 
+    try {
+        const updatedCourse = await Course.findOneAndUpdate(
+            { id: parseInt(id) },
+            { CourseName },
+            { new: true }
+        );
+
+        if (!updatedCourse) {
+            return res.status(404).json({ message: "Course not found" });
+        }
+
+        res.status(200).json({ message: "Course updated successfully", course: updatedCourse });
+    } catch (error) {
+        res.status(500).json({ message: "Failed to update course", error: error.message });
+    }
+};
+
+exports.deleteCoursebyID = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const deletedCourse = await Course.findOneAndDelete({ id: parseInt(id) });
+
+        if (!deletedCourse) {
+            return res.status(404).json({ message: "No such course exists" });
+        }
+
+        res.status(200).json({ message: "Course deleted successfully", course: deletedCourse });
+    } catch (error) {
+        res.status(500).json({ message: "Failed to delete course", error: error.message });
+    }
 };

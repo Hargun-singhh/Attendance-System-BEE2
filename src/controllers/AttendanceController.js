@@ -1,87 +1,132 @@
-const attendances = require('../data/attendance')
-const students = require('../data/students');
-const courses = require('../data/Course');
+const Attendance = require('../Model/Attendance');
+const Student = require('../Model/Student');
+const Course = require('../Model/Course');
 
-exports.makeAttendance = (req, res) => {
-    
-    const { id, courseId, status } = req.query;
-    console.log("Input courseId:", courseId);
+exports.makeAttendance = async (req, res) => {
+    const { rollNo, courseId, status } = req.query;
 
-    if (!id || !courseId || !status) {
+    if (!rollNo || !courseId || !status) {
         return res.status(400).json({ message: "Missing required parameters" });
     }
 
-    const student = students.find(student => student.id === parseInt(id));
-   
+    try {
+        const student = await Student.findOne({ RollNumber: rollNo });
+        if (!student) {
+            return res.status(404).json({ message: "No Student Found in Records" });
+        }
 
-    if (!student) {
-        return res.status(404).json({ message: "No Student Found in Records" });
+        const course = await Course.findOne({ id: parseInt(courseId) });
+        if (!course) {
+            return res.status(404).json({ message: "No Course Found in Records" });
+        }
+
+        const attendanceRecord = new Attendance({
+            studentId: student._id,
+            courseId: course._id,
+            status
+        });
+
+        const saved = await attendanceRecord.save();
+        res.status(201).json({ message: "Attendance Marked", record: saved });
+
+    } catch (error) {
+        res.status(500).json({ message: "Error saving attendance", error: error.message });
     }
-
-    const attendanceRecord = {
-        sno: attendances.length + 1,
-        id: student.id,
-        name: student.StudentName, 
-        courseId: parseInt(courseId),
-        status
-    };
-
-    attendances.push(attendanceRecord);
-    res.status(201).json({ message: "Attendance Marked", "Student Details": attendanceRecord });
 };
 
 
 
-exports.getAttendanceByCourse = (req, res) => {
+exports.getAttendanceByCourse = async (req, res) => {
     const { courseId } = req.query;
 
     if (!courseId) {
         return res.status(400).json({ message: "Missing courseId parameter" });
     }
 
-    const filteredAttendance = attendances.filter(a => a.courseId === parseInt(courseId));
+    try {
+        const course = await Course.findOne({ id: parseInt(courseId) });
+        if (!course) {
+            return res.status(404).json({ message: "Course not found" });
+        }
 
-    if (filteredAttendance.length === 0) {
-        return res.status(404).json({ message: "No attendance records found for this course" });
+        const records = await Attendance.find({ courseId: course._id }).populate('studentId', 'SName RollNumber');
+
+        if (records.length === 0) {
+            return res.status(404).json({ message: "No attendance records found for this course" });
+        }
+
+        res.status(200).json({ attendance: records });
+
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching attendance", error: error.message });
     }
-
-    res.status(200).json({ attendance: filteredAttendance });
 };
 
+exports.updateAttendance = async (req, res) => {
+    const { rollNo, courseId, status } = req.query;
 
-// Update Karne ke Liye
-exports.updateAttendance = (req, res) => {
-    const { id, courseId, status } = req.query;
-
-    if (!id || !courseId || !status) {
+    if (!rollNo || !courseId || !status) {
         return res.status(400).json({ message: "Missing required parameters" });
     }
 
-    const attendance = attendances.find(a => a.id === parseInt(id) && a.courseId === parseInt(courseId));
+    try {
+        const course = await Course.findOne({ id: parseInt(courseId) });
+        if (!course) {
+            return res.status(404).json({ message: "Course not found" });
+        }
 
-    if (!attendance) {
-        return res.status(404).json({ message: "Attendance record not found" });
+        const student = await Student.findOne({ RollNumber: rollNo });
+        if (!student) {
+            return res.status(404).json({ message: "Student not found" });
+        }
+
+        const updated = await Attendance.findOneAndUpdate(
+            { studentId: student._id, courseId: course._id },
+            { status },
+            { new: true }
+        );
+
+        if (!updated) {
+            return res.status(404).json({ message: "Attendance record not found" });
+        }
+
+        res.status(200).json({ message: "Attendance status updated", record: updated });
+
+    } catch (error) {
+        res.status(500).json({ message: "Error updating attendance", error: error.message });
     }
-
-    attendance.status = status;
-    res.status(200).json({ message: "Attendance status updated successfully", "Updated Attendance": attendance });
 };
 
+exports.delAttendance = async (req, res) => {
+    const { rollNo, courseId } = req.query;
 
-// Delete Attendance Records 
-exports.delAttendance = (req, res) => {
-    const { id, courseId } = req.query;
-
-    if (!id || !courseId) {
+    if (!rollNo || !courseId) {
         return res.status(400).json({ message: "Missing required parameters" });
     }
 
-    const index = attendances.findIndex(a => a.id === parseInt(id) && a.courseId === parseInt(courseId));
+    try {
+        const course = await Course.findOne({ id: parseInt(courseId) });
+        if (!course) {
+            return res.status(404).json({ message: "Course not found" });
+        }
 
-    if (index === -1) {
-        return res.status(404).json({ message: "Attendance record not found" });
+        const student = await Student.findOne({ RollNumber: rollNo });
+        if (!student) {
+            return res.status(404).json({ message: "Student not found" });
+        }
+
+        const deleted = await Attendance.findOneAndDelete({
+            studentId: student._id,
+            courseId: course._id
+        });
+
+        if (!deleted) {
+            return res.status(404).json({ message: "Attendance record not found" });
+        }
+
+        res.status(200).json({ message: "Attendance deleted", deleted });
+
+    } catch (error) {
+        res.status(500).json({ message: "Error deleting attendance", error: error.message });
     }
-
-    attendances.splice(index, 1);
-    res.status(200).json({ message: "Attendance record deleted successfully" });
 };

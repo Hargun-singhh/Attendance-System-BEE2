@@ -1,49 +1,66 @@
-const students = require('../data/students');
+const Student = require('../Model/Student');
 
-exports.allstudents = (req, res) => {
-    if (students.length === 0) {
-        return res.status(404).json({ message: "No students found" });
+exports.allstudents = async (req, res) => {
+    try {
+        const students = await Student.find();
+        if (students.length === 0) {
+            return res.status(404).json({ message: "No students found" });
+        }
+        res.status(200).json(students);
+    } catch (err) {
+        res.status(500).json({ message: "Server error", error: err.message });
     }
-    res.status(200).json(students);
 };
 
+exports.addstudent = async (req, res) => {
+    const { SName, RollNumber } = req.body;
 
-exports.addstudent = (req, res) => {
-    const {SName, RollNumber } = req.body;
-
-    const StundentDetails = {
-        id: students.length + 1,
-        StudentName: SName,
-        RollNumber : parseInt(RollNumber)
-
-    };
-
-    students.push(StundentDetails);
-    res.status(201).json({ message: "Student Record Added Successfully :) " });
-};
-
-exports.updateStudentName = (req, res) => {
-    const { RollNumber } = req.params; 
-    const { SName } = req.body; 
-    const student = students.find(s => s.RollNumber === parseInt(RollNumber));
-
-    if (!student) {
-        return res.status(404).json({ message: "Student not found" });
+    if (!SName || !RollNumber) {
+        return res.status(400).json({ message: "Missing required parameters" });
     }
 
-    student.StudentName = SName;
-    res.status(200).json({ message: "Student name updated successfully", student });
+    try {
+        const newStudent = new Student({ SName, RollNumber: parseInt(RollNumber) });
+        await newStudent.save();
+        res.status(201).json({ message: "Student Record Added Successfully :)" });
+    } catch (err) {
+        res.status(500).json({ message: "Failed to add student", error: err.message });
+    }
 };
 
-// Delete Student record by its roll No
-exports.deleteStudentByRollNo = (req, res) => {
+exports.updateStudentName = async (req, res) => {
     const { RollNumber } = req.params;
-    const index = students.findIndex(student => student.RollNumber === parseInt(RollNumber));
+    const { SName } = req.body;
 
-    if (index === -1) {
-        return res.status(404).json({ message: "No such student exists" });
+    try {
+        const student = await Student.findOneAndUpdate(
+            { RollNumber: parseInt(RollNumber) },
+            { SName },
+            { new: true }
+        );
+
+        if (!student) {
+            return res.status(404).json({ message: "Student not found" });
+        }
+
+        res.status(200).json({ message: "Student name updated successfully", student });
+    } catch (err) {
+        res.status(500).json({ message: "Update failed", error: err.message });
     }
+};
 
-    students.splice(index, 1);
-    res.status(200).json({ message: "Student Record deleted successfully" });
+exports.deleteStudentByRollNo = async (req, res) => {
+    const { RollNumber } = req.params;
+
+    try {
+        const student = await Student.findOneAndDelete({ RollNumber: parseInt(RollNumber) });
+
+        if (!student) {
+            return res.status(404).json({ message: "No such student exists" });
+        }
+
+        res.status(200).json({ message: "Student Record deleted successfully" });
+    } catch (err) {
+        res.status(500).json({ message: "Delete failed", error: err.message });
+    }
 };
