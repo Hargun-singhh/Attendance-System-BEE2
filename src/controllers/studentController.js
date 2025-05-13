@@ -64,3 +64,29 @@ exports.deleteStudentByRollNo = async (req, res) => {
         res.status(500).json({ message: "Delete failed", error: err.message });
     }
 };
+
+
+exports.renderAllStudents = async (req, res) => {
+    try {
+        const students = await Student.find();
+        res.render('students', { students });
+    } catch (err) {
+        res.status(500).send("Error loading students");
+    }
+};
+
+exports.addStudentAndRedirect = async (req, res) => {
+    const { SName, RollNumber } = req.body;
+
+    if (!SName || !RollNumber) {
+        return res.render('addStudent', { error: "Missing required fields" });
+    }
+
+    try {
+        const newStudent = new Student({ SName, RollNumber: parseInt(RollNumber) });
+        await newStudent.save();
+        res.redirect('/students/view/all');
+    } catch (err) {
+        res.render('addStudent', { error: "Error adding student" });
+    }
+};

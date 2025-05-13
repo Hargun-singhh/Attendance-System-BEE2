@@ -1,0 +1,19 @@
+<h2>All Professors</h2>
+
+
+<% if (professors.length === 0) { %>
+  <p>No professors found.</p>
+<% } else { %>
+  <table>
+    <tr>
+      <th>Name</th>
+      <th>ID</th>
+    </tr>
+    <% professors.forEach(professor => { %>
+      <tr>
+        <td><%= professor.PName %></td>
+        <td><%= professor.ID %></td>
+      </tr>
+    <% }); %>
+  </table>
+<% } %>

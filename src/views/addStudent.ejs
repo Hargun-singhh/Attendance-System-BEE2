@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Student | Student Management</title>
+    <style>
+
+.navbar {
+    width: 100%;
+    background-color: black;
+    padding: 1rem 2rem;
+    color: var(--white);font: inherit;
+    height: 50px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+}
+
+.navbar-brand {
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+        :root {
+            --primary-color: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary-color: #3f37c9;
+            --light-gray: #f8f9fa;
+            --dark-gray: #495057;
+            --white: #ffffff;
+            --error-color: #e63946;
+            --success-color: #2a9d8f;
+            --box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background:linear-gradient(135deg, #1c64d1 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .content {
+            background-color: var(--white);
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: var(--box-shadow);
+            width: 100%;
+            max-width: 500px;
+            transform: translateY(0);
+            transition: var(--transition);
+        }
+
+        .content:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .error-message {
+            color: var(--error-color);
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-align: center;
+            padding: 0.8rem;
+            margin-bottom: 1.5rem;
+            background-color: rgba(230, 57, 70, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid var(--error-color);
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 1rem;
+            color: var(--dark-gray);
+            font-weight: 500;
+        }
+
+        input {
+            padding: 0.8rem 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+            width: 100%;
+            background-color: var(--light-gray);
+        }
+
+        input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            background-color: var(--white);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            padding: 1rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 0.5rem;
+            letter-spacing: 0.5px;
+        }
+
+        button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--dark-gray);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .back-link:hover {
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            .content {
+                padding: 1.5rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-container">
+        <div class="navbar-brand">Student Management</div>
+    </div>
+</nav>
+    <div class="content">
+        <h2>Add New Student</h2>
+
+        <% if (typeof error !== 'undefined') { %>
+            <div class="error-message">
+                <%= error %>
+            </div>
+        <% } %>
+
+        <form action="/students/view/add" method="POST">
+            <div class="form-group">
+                <label for="SName">Full Name</label>
+                <input type="text" id="SName" name="SName" placeholder="Enter student's full name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="RollNumber">Roll Number</label>
+                <input type="number" id="RollNumber" name="RollNumber" placeholder="Enter roll number" required>
+            </div>
+
+            <button type="submit">Add Student</button>
+        </form>
+        
+        <a href="/students/view/all" class="back-link">← Back to Student List</a>
+    </div>
+</body>
+</html>
